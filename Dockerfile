@@ -31,6 +31,7 @@ COPY calcs.py ./calcs.py
 COPY visuals.py ./visuals.py
 COPY data ./data
 COPY logos ./logos
+COPY md_files ./md_files
 COPY _brand.yml ./_brand.yml
 
 # Requirement for deployment at hf
