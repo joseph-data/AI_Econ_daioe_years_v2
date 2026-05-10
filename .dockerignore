@@ -8,7 +8,6 @@ __pycache__/
 
 # Dev/scratch files
 app_v*.py
-md_files/
 
 # Git
 .git/
