@@ -1,0 +1,16 @@
+# Virtual environment large, rebuilt inside the image
+.venv/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Dev/scratch files
+app_v*.py
+md_files/
+
+# Git
+.git/
+.gitignore
+

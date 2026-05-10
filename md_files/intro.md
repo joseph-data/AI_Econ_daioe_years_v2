@@ -1,0 +1,1 @@
+This dashboard provides data on the current employment by occupation accross the SSYK Levels, and also highlights the changes in the employment for varied levels of AI exposure.
