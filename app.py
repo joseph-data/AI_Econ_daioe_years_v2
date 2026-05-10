@@ -1,7 +1,7 @@
 from pathlib import Path
 
 import polars as pl
-from shiny import reactive
+from shiny import reactive, req
 from shiny.express import app_opts, input, render, ui
 from shinywidgets import render_plotly
 
@@ -118,6 +118,7 @@ with ui.navset_pill(id="tab"):
                 @render.ui
                 def occ_value_boxes():
                     """Render employment and % change value boxes for the selected occupation."""
+                    req(input.occupation())
                     summary = occ_summary()
                     if summary is None:
                         return ui.p("No data available.")
@@ -129,6 +130,7 @@ with ui.navset_pill(id="tab"):
                 @render_plotly
                 def ai_exposure_bar():
                     """Render bar chart of AI exposure level per sub-domain, coloured by index score."""
+                    req(input.occupation())
                     df = calcs.get_occ_ai_exposure(lf, input.occupation(), int(input.occ_year()))
                     return visuals.build_ai_exposure_bar(df.to_pandas(), input.occupation(), int(input.occ_year()))
 
@@ -157,6 +159,7 @@ with ui.navset_pill(id="tab"):
                     @render_plotly
                     def occ_age_chart():
                         """Render a line chart of 1-yr employment % change per age group."""
+                        req(input.occupation())
                         df = occ_employment_by_age()
                         return visuals.build_age_chart(df.to_pandas(), input.occupation())
 
