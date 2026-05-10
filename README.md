@@ -24,12 +24,4 @@ An interactive Shiny app for exploring AI exposure and employment trends across 
 | Data | Source |
 |------|--------|
 | AI Exposure Index | [DAIOE — AI Econ Lab](https://www.ai-econlab.com/ai-exposure-daioe) |
-| Employment Statistics | [Swedish Occupational Register, SCB](https://www.scb.se/en/finding-statistics/statistics-by-subject-area/labour-market/labour-force-supply/the-swedish-occupational-register-with-statistics/) |
-
-## Stack
-
-- [Shiny for Python](https://shiny.posit.co/py/) (Express)
-- [Polars](https://pola.rs/) — data processing
-- [Plotly](https://plotly.com/python/) — interactive charts
-- [Great Tables](https://posit-dev.github.io/great-tables/) — data preview tables
-- [uv](https://docs.astral.sh/uv/) — dependency management
+| Employment Statistics | [Swedish Occupational Register, SCB](https://www.scb.se/en/finding-statistics/statistics-by-subject-area/labour-market/labour-force-supply/the-swedish-occupational-register-with-statistics/)
