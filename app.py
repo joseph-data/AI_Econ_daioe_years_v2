@@ -32,6 +32,45 @@ AI_CAPS = {
 
 SEX_COLORS = {"men": "#4C72B0", "women": "#DD8452"}
 
+
+def selected_sexes():
+    return list(input.sex() or [])
+
+
+def filter_rows(level=None, year_range=None, year=None):
+    d = df_full.filter(pl.col("level") == (level or input.level()))
+    if year_range is not None:
+        d = d.filter(pl.col("year").is_between(year_range[0], year_range[1]))
+    if year is not None:
+        d = d.filter(pl.col("year") == year)
+    d = d.filter(pl.col("sex").is_in(selected_sexes()))
+    if input.age_group() != "All":
+        d = d.filter(pl.col("age_group") == input.age_group())
+    return d
+
+
+def pct_change_expr(chg_col, out_col):
+    base = pl.col("count").sum() - pl.col(chg_col).sum()
+    return (
+        pl.when(base != 0)
+        .then(pl.col(chg_col).sum() / base * 100)
+        .otherwise(None)
+        .alias(out_col)
+    )
+
+
+def format_number(value, template):
+    if value is None or value != value:
+        return "N/A"
+    return format(value, template)
+
+
+def format_percent(value, template):
+    if value is None or value != value:
+        return "N/A"
+    return f"{format(value, template)}%"
+
+
 # ── Page ───────────────────────────────────────────────────────────────────────
 ui.page_opts(
     title="DAIOE — AI Occupational Exposure Dashboard",
@@ -84,39 +123,27 @@ with ui.sidebar(width=270):
 @reactive.calc
 def filtered():
     """Time-series slice respecting all sidebar filters."""
-    sexes = list(input.sex())
-    d = df_full.filter(
-        pl.col("level") == input.level(),
-        pl.col("year").is_between(input.year_range()[0], input.year_range()[1]),
-    )
-    if sexes:
-        d = d.filter(pl.col("sex").is_in(sexes))
-    if input.age_group() != "All":
-        d = d.filter(pl.col("age_group") == input.age_group())
-    return d
+    return filter_rows(level=input.level(), year_range=input.year_range())
+
+
+@reactive.calc
+def snapshot_rows():
+    """Raw cross-sectional slice respecting all sidebar filters."""
+    return filter_rows(level=input.level(), year=int(input.year_snap()))
 
 
 @reactive.calc
 def snapshot():
     """Cross-sectional slice for the snapshot year, aggregated over sex/age."""
     cap_col = AI_CAPS[input.ai_cap()]
-    sexes = list(input.sex())
-    d = df_full.filter(
-        pl.col("level") == input.level(),
-        pl.col("year") == int(input.year_snap()),
-    )
-    if sexes:
-        d = d.filter(pl.col("sex").is_in(sexes))
-    if input.age_group() != "All":
-        d = d.filter(pl.col("age_group") == input.age_group())
     return (
-        d.group_by("ssyk_code", "occupation")
+        snapshot_rows().group_by("ssyk_code", "occupation")
         .agg(
             pl.col("count").sum(),
             pl.col(cap_col).mean().alias("ai_score"),
-            pl.col("pct_chg_1y").mean(),
-            pl.col("pct_chg_3y").mean(),
-            pl.col("pct_chg_5y").mean(),
+            pct_change_expr("chg_1y", "pct_chg_1y"),
+            pct_change_expr("chg_3y", "pct_chg_3y"),
+            pct_change_expr("chg_5y", "pct_chg_5y"),
         )
         .sort("ai_score", descending=True)
     )
@@ -140,14 +167,14 @@ with ui.navset_tab():
                 "Avg GenAI Exposure"
                 @render.text
                 def kpi_genai():
-                    return f"{filtered()['daioe_genai_avg'].mean():.3f}"
+                    return format_number(filtered()["daioe_genai_avg"].mean(), ".3f")
 
             with ui.value_box(showcase=fa.icon_svg("arrow-trend-up"), theme="success"):
                 "Avg 1-Year Emp. Change"
                 @render.text
                 def kpi_chg():
-                    val = filtered().drop_nulls("pct_chg_1y")["pct_chg_1y"].mean()
-                    return f"{val:+.1f}%"
+                    val = filtered().select(pct_change_expr("chg_1y", "pct_chg_1y")).item()
+                    return format_percent(val, "+.1f")
 
             with ui.value_box(showcase=fa.icon_svg("briefcase"), theme="secondary"):
                 "Occupations in View"
@@ -184,15 +211,9 @@ with ui.navset_tab():
                 def plot_exp_dist():
                     cap_col = AI_CAPS[input.ai_cap()]
                     level_col = cap_col.replace("_avg", "_Level_Exposure")
-                    sexes = list(input.sex())
-                    d = df_full.filter(
-                        pl.col("level") == input.level(),
-                        pl.col("year") == int(input.year_snap()),
-                    )
-                    if sexes:
-                        d = d.filter(pl.col("sex").is_in(sexes))
                     d = (
-                        d.drop_nulls(level_col)
+                        snapshot_rows()
+                        .drop_nulls(level_col)
                         .group_by(level_col)
                         .agg(pl.col("count").sum())
                         .sort(level_col)
@@ -252,7 +273,7 @@ with ui.navset_tab():
                 d = filtered()
                 labels = list(AI_CAPS.keys())
                 cols = list(AI_CAPS.values())
-                means = [round(float(d[c].mean()), 3) for c in cols]
+                means = [round(float(d[c].mean() or 0), 3) for c in cols]
                 fig = go.Figure(go.Scatterpolar(
                     r=means + [means[0]],
                     theta=labels + [labels[0]],
@@ -323,9 +344,8 @@ with ui.navset_tab():
                 def plot_age():
                     d = (
                         filtered()
-                        .drop_nulls("pct_chg_1y")
                         .group_by("age_group")
-                        .agg(pl.col("pct_chg_1y").mean())
+                        .agg(pct_change_expr("chg_1y", "pct_chg_1y"))
                         .sort("age_group")
                         .to_pandas()
                     )
@@ -354,15 +374,9 @@ with ui.navset_tab():
             @render_plotly
             def plot_cap_trend():
                 cap_col = AI_CAPS[input.ai_cap()]
-                sexes = list(input.sex())
-                d = df_full.filter(
-                    pl.col("level") == "SSYK1",
-                    pl.col("year").is_between(input.year_range()[0], input.year_range()[1]),
-                )
-                if sexes:
-                    d = d.filter(pl.col("sex").is_in(sexes))
                 d = (
-                    d.group_by("year", "occupation")
+                    filter_rows(level="SSYK1", year_range=input.year_range())
+                    .group_by("year", "occupation")
                     .agg(pl.col(cap_col).mean().alias("ai_score"))
                     .sort("year")
                     .to_pandas()
@@ -384,10 +398,7 @@ with ui.navset_tab():
                 @render_plotly
                 def plot_area():
                     d = (
-                        df_full.filter(
-                            pl.col("level") == input.level(),
-                            pl.col("year").is_between(input.year_range()[0], input.year_range()[1]),
-                        )
+                        filtered()
                         .group_by("year", "sex")
                         .agg(pl.col("count").sum())
                         .sort("year")
@@ -407,15 +418,9 @@ with ui.navset_tab():
                 ui.card_header("GenAI vs All-Apps Exposure Gap Over Time")
                 @render_plotly
                 def plot_gap():
-                    sexes = list(input.sex())
-                    d = df_full.filter(
-                        pl.col("level") == input.level(),
-                        pl.col("year").is_between(input.year_range()[0], input.year_range()[1]),
-                    )
-                    if sexes:
-                        d = d.filter(pl.col("sex").is_in(sexes))
                     d = (
-                        d.group_by("year")
+                        filtered()
+                        .group_by("year")
                         .agg(
                             pl.col("daioe_genai_avg").mean().alias("GenAI"),
                             pl.col("daioe_allapps_avg").mean().alias("All Apps"),
