@@ -1,0 +1,81 @@
+# ─────────────────────────────────────────────
+# _brand.yml — joseph-data
+# ─────────────────────────────────────────────
+
+meta:
+  name: joseph-data
+  link: https://github.com/joseph-data
+
+logo:
+  images:
+    icon-color: logos/jon.png
+    wide-color:  logos/jon.png
+    tall-color:  logos/jon.png
+  small:  icon-color
+  medium: wide-color
+  large:  tall-color
+
+# ─── Color ───────────────────────────────────
+color:
+  palette:
+    black:   "#1C2826"
+    blue:    "#0C0A3E"
+    gray:    "#2A2E45"
+    neutral: "#F9F7F1"
+    red:     "#BA274A"
+    violet:  "#4D6CFA"
+
+  background: neutral
+  foreground: black
+  primary:    blue
+  secondary:  violet
+  tertiary:   gray
+  danger:     red
+  light:      neutral
+  dark:       black
+
+# ─── Typography ──────────────────────────────
+typography:
+  fonts:
+    - family: Nunito Sans
+      source:  google
+      weight:  [300, 400, 600]
+      style:   normal
+    - family: Montserrat
+      source:  google
+      weight:  [600, 700, 800]
+      style:   normal
+    - family: Fira Code
+      source:  google
+      weight:  [400, 500]
+      style:   normal
+
+  base:
+    family:      Nunito Sans
+    size:        1rem
+    weight:      400
+    line-height: 1.5
+
+  headings:
+    family:      Montserrat
+    weight:      700
+    color:       primary
+    line-height: 1.2
+
+  monospace:
+    family: Fira Code
+    size:   0.9em
+    weight: 400
+
+  monospace-inline:
+    color:            primary
+    background-color: light
+
+  monospace-block:
+    color:            foreground
+    background-color: light
+    line-height:      1.6
+
+  link:
+    color:      secondary
+    decoration: underline
