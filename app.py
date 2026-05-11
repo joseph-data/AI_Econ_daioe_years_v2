@@ -274,7 +274,7 @@ with ui.navset_pill(id="tab"):
                         style="font-size: 0.9rem;",
                     )
 
-            with ui.layout_columns(col_widths=[6, 6], gap="1rem"):
+            with ui.layout_columns(col_widths=[12, 12]):
                 with ui.card(full_screen=True):
                     ui.card_header("Annual Employment Change (Selected Occupations)")
 
