@@ -122,6 +122,50 @@ def get_occ_ai_trend(
     )
 
 
+def get_comparison_employment(
+    lf: pl.LazyFrame,
+    occupations: list[str],
+    age_groups: list[str],
+) -> pl.DataFrame:
+    """
+    Return total employment per year/occupation for the comparison view.
+
+    Aggregates across all sexes and the selected age groups.
+    Returns a DataFrame with columns: year, occupation, count.
+    """
+    return (
+        lf.filter(
+            pl.col("occupation").is_in(occupations)
+            & pl.col("age_group").is_in(age_groups),
+        )
+        .group_by(["year", "occupation"])
+        .agg(pl.col("count").sum())
+        .sort(["occupation", "year"])
+        .collect()
+    )
+
+
+def get_comp_radar(
+    lf: pl.LazyFrame,
+    occupations: list[str],
+    year: int,
+) -> pl.DataFrame:
+    """
+    Return mean AI percentile scores per occupation for the radar chart.
+
+    Returns a DataFrame with columns: occupation, pctl_<metric>_wavg for each metric.
+    """
+    return (
+        lf.filter(
+            pl.col("occupation").is_in(occupations)
+            & (pl.col("year") == year),
+        )
+        .group_by("occupation")
+        .agg([pl.col(c).mean() for c in AI_PCTL_COLS])
+        .collect()
+    )
+
+
 def get_occ_employment_by_age(
     lf: pl.LazyFrame,
     occupation: str,

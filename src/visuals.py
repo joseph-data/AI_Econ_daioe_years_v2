@@ -137,6 +137,58 @@ def build_age_chart(df: pd.DataFrame, occupation: str) -> go.Figure:
     return fig
 
 
+def build_comparison_employment_plot(df: pd.DataFrame) -> go.Figure:
+    """Build a line chart comparing employment trends across selected occupations."""
+    if df.empty:
+        return go.Figure()
+
+    fig = px.line(
+        df,
+        x="year",
+        y="count",
+        color="occupation",
+        markers=True,
+        labels={"count": "Total Employment", "year": "Year"},
+    )
+    fig.update_layout(
+        **_BASE_LAYOUT,
+        legend={"orientation": "h", "yanchor": "bottom", "y": -0.25, "xanchor": "center", "x": 0.5, "title": None},
+    )
+    fig.update_xaxes(gridcolor=_C_GRID, zeroline=False, dtick=1)
+    fig.update_yaxes(gridcolor=_C_GRID, zeroline=False)
+    return fig
+
+
+def build_comp_radar_plot(df: pd.DataFrame, metrics: dict[str, str]) -> go.Figure:
+    """Build a radar chart comparing AI percentile scores across selected occupations."""
+    if df.empty:
+        return go.Figure()
+
+    categories = list(metrics.values())
+    fig = go.Figure()
+
+    for _, row in df.iterrows():
+        r_values = [row[f"pctl_{k}_wavg"] for k in metrics]
+        r_values_closed = [*r_values, r_values[0]]
+        categories_closed = [*categories, categories[0]]
+
+        fig.add_trace(go.Scatterpolar(
+            r=r_values_closed,
+            theta=categories_closed,
+            fill="toself",
+            name=row["occupation"],
+            hovertemplate="%{theta}: %{r:.1f}%<extra></extra>",
+        ))
+
+    fig.update_layout(
+        **_BASE_LAYOUT,
+        polar={"radialaxis": {"visible": True, "range": [0, 100]}},
+        showlegend=True,
+        legend={"orientation": "h", "yanchor": "bottom", "y": -0.25, "xanchor": "center", "x": 0.5},
+    )
+    return fig
+
+
 def build_ai_exposure_bar(df: pd.DataFrame, occupation: str, year: int) -> go.Figure:
     """
     Build a vertical bar chart of AI exposure level per sub-domain.

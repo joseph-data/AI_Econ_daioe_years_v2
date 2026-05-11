@@ -19,6 +19,7 @@ from src.setup import (
     build_choices_by_level,
     download_extension,
     download_media_type,
+    empty_figure,
     export_filtered_data,
     lf,
 )
@@ -74,6 +75,25 @@ def occ_summary():
     return calcs.get_occ_summary(lf, input.occupation(), int(input.occ_year()))
 
 
+
+
+@reactive.calc
+def comparison_data():
+    """Return total employment per year/occupation for the comparison view."""
+    occs = list(input.comp_occs())
+    ages = list(input.comp_age())
+    if not occs or not ages:
+        return pl.DataFrame()
+    return calcs.get_comparison_employment(lf, occs, ages)
+
+
+@reactive.calc
+def comp_radar_data():
+    """Return mean AI percentile scores per occupation for the radar chart."""
+    occs = list(input.comp_occs())
+    if not occs:
+        return pl.DataFrame()
+    return calcs.get_comp_radar(lf, occs, int(input.comp_year()))
 
 
 @reactive.calc
@@ -168,7 +188,79 @@ with ui.navset_pill(id="tab"):
                 "Card 4"
 
     with ui.nav_panel(title="2. Comparison View"):
-        "Panel B content"
+        with ui.layout_sidebar():
+            with ui.sidebar(bg="#FFFFFF", width=300, title="Benchmarking"):
+                ui.input_select("comp_level", "SSYK Level", choices=["All Levels", *LEVELS], selected=DEFAULT_LEVEL)
+                ui.input_selectize("comp_occs", "Select Occupations", choices={}, multiple=True)
+                ui.hr()
+                ui.input_selectize("comp_age", "Age Group", choices=AGES, selected="Early Career 2 (25-29)", multiple=True)
+                ui.hr()
+                ui.input_select("comp_year", "Comparison Year (Radar)", choices=[str(y) for y in YEARS], selected=str(YEAR_MAX))
+
+            with ui.card():
+                ui.card_header("Benchmarking Summary")
+
+                @render.ui
+                def comparison_summary():
+                    df = comparison_data()
+                    if df.is_empty():
+                        return ui.markdown("*Select occupations to generate a summary...*")
+
+                    latest_yr = df["year"].max()
+                    summary_rows = []
+                    for occ in df["occupation"].unique():
+                        sub = df.filter(pl.col("occupation") == occ).sort("year")
+                        curr_emp = sub.tail(1)["count"][0]
+
+                        def _val(yr, _sub=sub):
+                            s = _sub.filter(pl.col("year") == yr)["count"]
+                            return f"{int(s[0]):,}" if not s.is_empty() else "---"
+
+                        summary_rows.append(
+                            ui.tags.tr(
+                                ui.tags.td(occ, style="font-weight: bold;"),
+                                ui.tags.td(_val(latest_yr - 5)),
+                                ui.tags.td(_val(latest_yr - 3)),
+                                ui.tags.td(_val(latest_yr - 1)),
+                                ui.tags.td(f"{int(curr_emp):,}", style="background-color: #f8f9fa; font-weight: bold;"),
+                            ),
+                        )
+
+                    return ui.tags.table(
+                        ui.tags.thead(
+                            ui.tags.tr(
+                                ui.tags.th("Occupation"),
+                                ui.tags.th(f"Emp ({latest_yr - 5})"),
+                                ui.tags.th(f"Emp ({latest_yr - 3})"),
+                                ui.tags.th(f"Emp ({latest_yr - 1})"),
+                                ui.tags.th(f"Emp ({latest_yr})"),
+                            ),
+                        ),
+                        ui.tags.tbody(*summary_rows),
+                        class_="table table-sm table-hover",
+                        style="font-size: 0.9rem;",
+                    )
+
+            with ui.layout_columns(col_widths=[6, 6], gap="1rem"):
+                with ui.card(full_screen=True):
+                    ui.card_header("Employment Trends (Selected Occupations)")
+
+                    @render_plotly
+                    def comparison_employment_plot():
+                        df = comparison_data()
+                        if df.is_empty():
+                            return empty_figure("Select occupations to compare", {"text": "#666"})
+                        return visuals.build_comparison_employment_plot(df.to_pandas())
+
+                with ui.card(full_screen=True):
+                    ui.card_header("Radar Comparison (AI Exposure Percentiles)")
+
+                    @render_plotly
+                    def comp_radar_plot():
+                        df = comp_radar_data()
+                        if df.is_empty():
+                            return empty_figure("Select occupations to compare", {"text": "#666"})
+                        return visuals.build_comp_radar_plot(df.to_pandas(), METRICS)
 
     with ui.nav_panel(title="3. Download"):
         ui.p(
@@ -271,6 +363,17 @@ def _sync_occupation_choices():
     level = input.occ_level()
     choices = OCCUPATION_CHOICES[level]
     ui.update_selectize("occupation", choices=choices, selected=next(iter(choices)))
+
+
+@reactive.effect
+def _sync_comp_occupation_choices():
+    """Update comparison occupation choices when the SSYK level changes."""
+    level = input.comp_level()
+    if level == "All Levels":
+        choices = {occ: occ for d in OCCUPATION_CHOICES.values() for occ in d}
+    else:
+        choices = OCCUPATION_CHOICES.get(level, {})
+    ui.update_selectize("comp_occs", choices=choices, selected=[])
 
 
 @reactive.effect
