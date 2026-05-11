@@ -37,7 +37,11 @@ DEFAULT_OCCUPATION = next(iter(OCCUPATION_CHOICES[DEFAULT_LEVEL]))
 
 ui.page_opts(
     title=ui.tags.span(
-        ui.tags.img(src="logos/lab.svg", height="32px", style="margin-right:10px;vertical-align:middle;"),
+        ui.tags.img(
+            src="logos/lab.svg",
+            height="32px",
+            style="margin-right:10px;vertical-align:middle;",
+        ),
         "Yearly DAIOE Explorer of Swedish Occupations",
     ),
     theme=ui.Theme.from_brand(__file__),
@@ -50,7 +54,9 @@ ui.page_opts(
 @reactive.calc
 def _download_frame():
     """Collect filtered rows for the download tab."""
-    occupations = list(input.download_occupation()) if input.download_occupation() else None
+    occupations = (
+        list(input.download_occupation()) if input.download_occupation() else None
+    )
     years = input.download_years()
     age = input.download_age()
     sexes = list(input.download_sex())
@@ -72,8 +78,6 @@ def _download_frame():
 def occ_summary():
     """Reactive wrapper: returns summary dict for the selected occupation and year."""
     return calcs.get_occ_summary(lf, input.occupation(), int(input.occ_year()))
-
-
 
 
 @reactive.calc
@@ -113,7 +117,9 @@ with ui.navset_pill(id="tab"):
                     ui.input_select(
                         "occ_level",
                         "SSYK level",
-                        choices={level: LEVEL_LABELS.get(level, level) for level in LEVELS},
+                        choices={
+                            level: LEVEL_LABELS.get(level, level) for level in LEVELS
+                        },
                         selected=DEFAULT_LEVEL,
                         width="200px",
                     )
@@ -147,15 +153,19 @@ with ui.navset_pill(id="tab"):
                 def ai_exposure_bar():
                     """Render bar chart of AI exposure level per sub-domain, coloured by index score."""
                     req(input.occupation())
-                    df = calcs.get_occ_ai_exposure(lf, input.occupation(), int(input.occ_year()))
-                    return visuals.build_ai_exposure_bar(df.to_pandas(), input.occupation(), int(input.occ_year()))
+                    df = calcs.get_occ_ai_exposure(
+                        lf, input.occupation(), int(input.occ_year())
+                    )
+                    return visuals.build_ai_exposure_bar(
+                        df.to_pandas(), input.occupation(), int(input.occ_year())
+                    )
 
                 ui.markdown(visuals.DAIOE_SOURCE_MD)
 
             with ui.card(full_screen=True):
                 ui.card_header("Employment by Age Group")
                 with ui.layout_sidebar():
-                    with ui.sidebar(width="220px"):
+                    with ui.sidebar(width="220px", open="closed"):
                         ui.input_slider(
                             "chart_year_range",
                             "Year range",
@@ -172,12 +182,15 @@ with ui.navset_pill(id="tab"):
                             selected=AGES[:2],
                             multiple=True,
                         )
+
                     @render_plotly
                     def occ_age_chart():
                         """Render a line chart of 1-yr employment % change per age group."""
                         req(input.occupation())
                         df = occ_employment_by_age()
-                        return visuals.build_age_chart(df.to_pandas(), input.occupation())
+                        return visuals.build_age_chart(
+                            df.to_pandas(), input.occupation()
+                        )
 
                     ui.markdown(visuals.SCB_SOURCE_MD)
 
@@ -186,16 +199,35 @@ with ui.navset_pill(id="tab"):
 
     with ui.nav_panel(title="2. Comparison View"):
         with ui.layout_sidebar():
-            with ui.sidebar(bg="#FFFFFF", width=300, title="Benchmarking"):
-                ui.input_select("comp_level", "SSYK Level", choices=["All Levels", *LEVELS], selected=DEFAULT_LEVEL)
-                ui.input_selectize("comp_occs", "Select Occupations", choices={}, multiple=True)
+            with ui.sidebar(bg="#FFFFFF", width=250, title="Benchmarking"):
+                ui.input_select(
+                    "comp_level",
+                    "SSYK Level",
+                    choices=["All Levels", *LEVELS],
+                    selected=DEFAULT_LEVEL,
+                )
+                ui.input_selectize(
+                    "comp_occs", "Select Occupations", choices={}, multiple=True,
+                    options={"placeholder": "Accountants ..."},
+                )
                 ui.hr()
-                ui.input_selectize("comp_age", "Age Group", choices=AGES, selected="Early Career 2 (25-29)", multiple=True)
+                ui.input_selectize(
+                    "comp_age",
+                    "Age Group",
+                    choices=AGES,
+                    selected="Early Career 2 (25-29)",
+                    multiple=True,
+                )
                 ui.hr()
-                ui.input_select("comp_year", "Comparison Year (Radar)", choices=[str(y) for y in YEARS], selected=str(YEAR_MAX))
+                ui.input_select(
+                    "comp_year",
+                    "Comparison Year (Radar)",
+                    choices=[str(y) for y in YEARS],
+                    selected=str(YEAR_MAX),
+                )
 
             with ui.card():
-                ui.card_header("Benchmarking Summary")
+                ui.card_header("Occupations Summary")
 
                 @render.ui
                 def comparison_summary():
@@ -217,7 +249,10 @@ with ui.navset_pill(id="tab"):
                                 ui.tags.td(_val(latest_yr - 5)),
                                 ui.tags.td(_val(latest_yr - 3)),
                                 ui.tags.td(_val(latest_yr - 1)),
-                                ui.tags.td(f"{int(curr_emp):,}", style="background-color: #f8f9fa; font-weight: bold;"),
+                                ui.tags.td(
+                                    f"{int(curr_emp):,}",
+                                    style="background-color: #f8f9fa; font-weight: bold;",
+                                ),
                             ),
                         )
 
@@ -242,14 +277,18 @@ with ui.navset_pill(id="tab"):
 
                     @render_plotly
                     def comparison_employment_plot():
-                        return visuals.build_comparison_employment_plot(comparison_data().to_pandas())
+                        return visuals.build_comparison_employment_plot(
+                            comparison_data().to_pandas()
+                        )
 
                 with ui.card(full_screen=True):
                     ui.card_header("Radar Comparison (AI Exposure Percentiles)")
 
                     @render_plotly
                     def comp_radar_plot():
-                        return visuals.build_comp_radar_plot(comp_radar_data().to_pandas(), METRICS)
+                        return visuals.build_comp_radar_plot(
+                            comp_radar_data().to_pandas(), METRICS
+                        )
 
     with ui.nav_panel(title="3. Download"):
         ui.p(
@@ -338,9 +377,16 @@ with ui.navset_pill(id="tab"):
             def download_preview():
                 """Render a preview table of the filtered download data."""
                 cols = [
-                    "level", "ssyk_code", "occupation", "year", "sex",
-                    "age_group", "count", "daioe_genai_wavg",
-                    "daioe_allapps_wavg", "pct_chg_1y",
+                    "level",
+                    "ssyk_code",
+                    "occupation",
+                    "year",
+                    "sex",
+                    "age_group",
+                    "count",
+                    "daioe_genai_wavg",
+                    "daioe_allapps_wavg",
+                    "pct_chg_1y",
                 ]
                 data = _download_frame().select(cols).head(50).to_pandas()
                 return as_great_table_html(data, METRICS)
@@ -369,4 +415,6 @@ def _sync_comp_occupation_choices():
 def _sync_download_occupation_choices():
     """Update the download occupation selectize when the download SSYK level changes."""
     level = input.download_level()
-    ui.update_selectize("download_occupation", choices=OCCUPATION_CHOICES[level], selected=[])
+    ui.update_selectize(
+        "download_occupation", choices=OCCUPATION_CHOICES[level], selected=[]
+    )
