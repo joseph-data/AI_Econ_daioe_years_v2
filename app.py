@@ -368,7 +368,7 @@ with ui.navset_pill(id="tab"):
                 )
                 def download_data():
                     """Export filtered data in the selected format."""
-                    return export_filtered_data(
+                    yield export_filtered_data(
                         _download_frame().to_pandas(),
                         input.download_format(),
                     )
