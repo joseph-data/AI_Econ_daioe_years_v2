@@ -163,9 +163,12 @@ def readable_column_name(col: str, metrics: dict[str, str]) -> str:
         "sex": "Sex",
         "level": "SSYK Level",
         "occupation": "Occupation",
-        "chg_1y": "1-year Change",
-        "chg_3y": "3-year Change",
-        "chg_5y": "5-year Change",
+        "chg_1y": "Emp Change 1yr (#)",
+        "chg_3y": "Emp Change 3yr (#)",
+        "chg_5y": "Emp Change 5yr (#)",
+        "pct_chg_1y": "Emp Change 1yr (%)",
+        "pct_chg_3y": "Emp Change 3yr (%)",
+        "pct_chg_5y": "Emp Change 5yr (%)",
     }
     if col in exact:
         return exact[col]
