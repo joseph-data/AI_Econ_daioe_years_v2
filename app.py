@@ -36,14 +36,14 @@ DEFAULT_LEVEL = "SSYK4" if "SSYK4" in LEVELS else LEVELS[0]
 DEFAULT_OCCUPATION = next(iter(OCCUPATION_CHOICES[DEFAULT_LEVEL]))
 
 ui.page_opts(
-    title=ui.tags.span(
-        ui.tags.img(
-            src="logos/lab.svg",
-            height="32px",
-            style="margin-right:10px;vertical-align:middle;",
-        ),
-        "Yearly DAIOE Explorer of Swedish Occupations",
-    ),
+    # title=ui.tags.span(
+    #     ui.tags.img(
+    #         src="logos/lab.svg",
+    #         height="32px",
+    #         style="margin-right:10px;vertical-align:middle;",
+    #     ),
+    #     "Yearly DAIOE Explorer of Swedish Occupations",
+    # ),
     theme=ui.Theme.from_brand(__file__),
     fillable=True,
     lang="en",
