@@ -110,7 +110,7 @@ def occ_employment_by_age():
 
 with ui.navset_pill(id="tab"):
     with ui.nav_panel(title="1. Occupation View"):
-        with ui.layout_columns(col_widths=[6, 6]):
+        with ui.layout_columns(col_widths=[12, 12]):
             with ui.card(full_screen=True):
                 ui.markdown(INTRO_MD)
                 with ui.div(class_="d-flex gap-3 align-items-end"):
@@ -194,8 +194,8 @@ with ui.navset_pill(id="tab"):
 
                     ui.markdown(visuals.SCB_SOURCE_MD)
 
-            with ui.card():
-                "Card 4"
+            # with ui.card():
+            #     "Card 4"
 
     with ui.nav_panel(title="2. Comparison View"):
         with ui.layout_sidebar():
@@ -207,7 +207,10 @@ with ui.navset_pill(id="tab"):
                     selected=DEFAULT_LEVEL,
                 )
                 ui.input_selectize(
-                    "comp_occs", "Select Occupations", choices={}, multiple=True,
+                    "comp_occs",
+                    "Select Occupations",
+                    choices={},
+                    multiple=True,
                     options={"placeholder": "Accountants ..."},
                 )
                 ui.hr()

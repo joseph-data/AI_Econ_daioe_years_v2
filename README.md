@@ -25,6 +25,4 @@ An interactive Shiny app for exploring AI exposure and employment trends across 
 | Data | Source |
 |------|--------|
 | AI Exposure Index | [DAIOE - AI Econ Lab](https://www.ai-econlab.com/ai-exposure-daioe) |
-| Employment Statistics | [Swedish Occupational Register, SCB](https://www.scb.se/en/finding-statistics/statistics-by-subject-area/labour-market/labour-force-supply/the-swedish-occupational-register-with-statistics/) 
-
-Test if i can 
+| Employment Statistics | [Swedish Occupational Register, SCB](https://www.scb.se/en/finding-statistics/statistics-by-subject-area/labour-market/labour-force-supply/the-swedish-occupational-register-with-statistics/) |

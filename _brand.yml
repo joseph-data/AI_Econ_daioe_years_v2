@@ -1,10 +1,10 @@
 # ─────────────────────────────────────────────
-# _brand.yml — AI-Econ Lab
+# _brand.yml — joseph-data
 # ─────────────────────────────────────────────
 
 meta:
-  name: ai-econ-lab
-  link: https://github.com/ai-econ-lab
+  name: joseph-data
+  link: https://github.com/joseph-data
 
 logo:
   images:
