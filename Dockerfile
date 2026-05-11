@@ -26,9 +26,7 @@ ENV PATH="/app/.venv/bin:$PATH"
 
 # Copy only what the app needs at runtime
 COPY app.py ./app.py
-COPY setup.py ./setup.py
-COPY calcs.py ./calcs.py
-COPY visuals.py ./visuals.py
+COPY src ./src
 COPY data ./data
 COPY logos ./logos
 COPY md_files ./md_files

@@ -5,11 +5,8 @@ from shiny import reactive, req
 from shiny.express import app_opts, input, render, ui
 from shinywidgets import render_plotly
 
-app_opts(static_assets={"/logos": Path(__file__).parent / "logos"})
-
-import calcs
-import visuals
-from setup import (
+from src import calcs, visuals
+from src.setup import (
     AGES,
     INTRO_MD,
     LEVELS,
@@ -25,6 +22,8 @@ from setup import (
     export_filtered_data,
     lf,
 )
+
+app_opts(static_assets={"/logos": Path(__file__).parent / "logos"})
 
 LEVEL_LABELS = {
     "SSYK1": "SSYK 1 - Major groups",
