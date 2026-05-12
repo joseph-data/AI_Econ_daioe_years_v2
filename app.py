@@ -110,92 +110,90 @@ def occ_employment_by_age():
 
 with ui.navset_pill(id="tab"):
     with ui.nav_panel(title="1. Occupation View"):
-        with ui.layout_columns(col_widths=[12, 12]):
-            with ui.card(full_screen=True):
+        with ui.layout_sidebar():
+            with ui.sidebar(width="280px", bg="#FFFFFF", title="Occupation Explorer"):
                 ui.markdown(INTRO_MD)
-                with ui.div(class_="d-flex gap-3 align-items-end"):
-                    ui.input_select(
-                        "occ_level",
-                        "SSYK level",
-                        choices={
-                            level: LEVEL_LABELS.get(level, level) for level in LEVELS
-                        },
-                        selected=DEFAULT_LEVEL,
-                        width="200px",
-                    )
-                    ui.input_selectize(
-                        "occupation",
-                        "Occupation",
-                        choices=OCCUPATION_CHOICES[DEFAULT_LEVEL],
-                        selected=DEFAULT_OCCUPATION,
-                    )
-                    ui.input_select(
-                        "occ_year",
-                        "Year",
-                        choices={y: str(y) for y in YEARS},
-                        selected=YEAR_MAX,
-                        width="120px",
-                    )
+                ui.input_select(
+                    "occ_level",
+                    "SSYK level",
+                    choices={level: LEVEL_LABELS.get(level, level) for level in LEVELS},
+                    selected=DEFAULT_LEVEL,
+                )
+                ui.input_selectize(
+                    "occupation",
+                    "Occupation",
+                    choices=OCCUPATION_CHOICES[DEFAULT_LEVEL],
+                    selected=DEFAULT_OCCUPATION,
+                )
+                ui.input_select(
+                    "occ_year",
+                    "Year",
+                    choices={y: str(y) for y in YEARS},
+                    selected=YEAR_MAX,
+                )
 
-                @render.ui
-                def occ_value_boxes():
-                    """Render employment and % change value boxes for the selected occupation."""
-                    req(input.occupation())
-                    summary = occ_summary()
-                    if summary is None:
-                        return ui.p("No data available.")
-                    return visuals.build_value_boxes(summary, input.occupation())
+            with ui.layout_columns(col_widths=[12, 12]):
+                with ui.card(full_screen=True, height="500px"):
 
-            with ui.card(full_screen=True):
-                ui.card_header("AI Exposure by Sub-domain")
+                    @render.ui
+                    def occ_value_boxes():
+                        """Render employment and % change value boxes for the selected occupation."""
+                        req(input.occupation())
+                        summary = occ_summary()
+                        if summary is None:
+                            return ui.p("No data available.")
+                        return visuals.build_value_boxes(summary, input.occupation())
 
-                @render_plotly
-                def ai_exposure_bar():
-                    """Render bar chart of AI exposure level per sub-domain, coloured by index score."""
-                    req(input.occupation())
-                    df = calcs.get_occ_ai_exposure(
-                        lf, input.occupation(), int(input.occ_year())
-                    )
-                    return visuals.build_ai_exposure_bar(
-                        df.to_pandas(), input.occupation(), int(input.occ_year())
-                    )
-
-                ui.markdown(visuals.DAIOE_SOURCE_MD)
-
-            with ui.card(full_screen=True):
-                ui.card_header("Employment by Age Group")
-                with ui.layout_sidebar():
-                    with ui.sidebar(width="220px", open="closed"):
-                        ui.input_slider(
-                            "chart_year_range",
-                            "Year range",
-                            min=min(YEARS),
-                            max=max(YEARS),
-                            value=(min(YEARS), max(YEARS)),
-                            step=1,
-                            sep="",
-                        )
-                        ui.input_selectize(
-                            "chart_age_groups",
-                            "Age groups",
-                            choices=AGES,
-                            selected=AGES[:2],
-                            multiple=True,
-                        )
+                with ui.card(full_screen=True, height="500px"):
+                    ui.card_header("AI Exposure by Sub-domain")
 
                     @render_plotly
-                    def occ_age_chart():
-                        """Render a line chart of 1-yr employment % change per age group."""
+                    def ai_exposure_bar():
+                        """Render bar chart of AI exposure level per sub-domain, coloured by index score."""
                         req(input.occupation())
-                        df = occ_employment_by_age()
-                        return visuals.build_age_chart(
-                            df.to_pandas(), input.occupation()
+                        df = calcs.get_occ_ai_exposure(
+                            lf, input.occupation(), int(input.occ_year())
+                        )
+                        return visuals.build_ai_exposure_bar(
+                            df.to_pandas(), input.occupation(), int(input.occ_year())
                         )
 
-                    ui.markdown(visuals.SCB_SOURCE_MD)
+                    ui.markdown(visuals.DAIOE_SOURCE_MD)
 
-            # with ui.card():
-            #     "Card 4"
+                with ui.card(full_screen=True, height="500px"):
+                    ui.card_header("Employment by Age Group")
+                    with ui.layout_sidebar():
+                        with ui.sidebar(width="220px", open="closed"):
+                            ui.input_slider(
+                                "chart_year_range",
+                                "Year range",
+                                min=min(YEARS),
+                                max=max(YEARS),
+                                value=(min(YEARS), max(YEARS)),
+                                step=1,
+                                sep="",
+                            )
+                            ui.input_selectize(
+                                "chart_age_groups",
+                                "Age groups",
+                                choices=AGES,
+                                selected=AGES[:2],
+                                multiple=True,
+                            )
+
+                        @render_plotly
+                        def occ_age_chart():
+                            """Render a line chart of 1-yr employment % change per age group."""
+                            req(input.occupation())
+                            df = occ_employment_by_age()
+                            return visuals.build_age_chart(
+                                df.to_pandas(), input.occupation()
+                            )
+
+                        ui.markdown(visuals.SCB_SOURCE_MD)
+
+                # with ui.card():
+                #     "Card 4"
 
     with ui.nav_panel(title="2. Comparison View"):
         with ui.layout_sidebar():
@@ -275,7 +273,7 @@ with ui.navset_pill(id="tab"):
                     )
 
             with ui.layout_columns(col_widths=[12, 12]):
-                with ui.card(full_screen=True):
+                with ui.card(full_screen=True, height="500px"):
                     ui.card_header("Annual Employment Change (Selected Occupations)")
 
                     @render_plotly
@@ -284,7 +282,7 @@ with ui.navset_pill(id="tab"):
                             comparison_data().to_pandas()
                         )
 
-                with ui.card(full_screen=True):
+                with ui.card(full_screen=True, height="500px"):
                     ui.card_header("Radar Comparison (AI Exposure Percentiles)")
 
                     @render_plotly
@@ -294,119 +292,116 @@ with ui.navset_pill(id="tab"):
                         )
 
     with ui.nav_panel(title="3. Download"):
-        ui.p(
-            "Export the filtered row-level dataset or inspect a compact preview before downloading.",
-            class_="text-muted mb-3",
-        )
-        with ui.div(class_="d-flex gap-3 align-items-end flex-wrap mb-3"):
-            ui.input_select(
-                "download_level",
-                "SSYK level",
-                choices={level: LEVEL_LABELS.get(level, level) for level in LEVELS},
-                selected=DEFAULT_LEVEL,
-                width="200px",
-            )
-            ui.input_slider(
-                "download_years",
-                "Year range",
-                min=YEAR_MIN,
-                max=YEAR_MAX,
-                value=(YEAR_MIN, YEAR_MAX),
-                step=1,
-                sep="",
-                width="220px",
-            )
-            ui.input_checkbox_group(
-                "download_sex",
-                "Sex",
-                choices={"men": "Men", "women": "Women"},
-                selected=SEXES,
-                inline=True,
-            )
-            ui.input_select(
-                "download_age",
-                "Age group",
-                choices={"All": "All ages"} | {a: a for a in AGES},
-                selected="All",
-                width="200px",
-            )
-            ui.input_selectize(
-                "download_occupation",
-                "Occupations",
-                choices=OCCUPATION_CHOICES[DEFAULT_LEVEL],
-                multiple=True,
-                options={"placeholder": "All occupations"},
-            )
-            ui.input_select(
-                "download_format",
-                "Format",
-                choices={"csv": "CSV", "parquet": "Parquet", "excel": "Excel"},
-                selected="csv",
-                width="120px",
-            )
-
-        with ui.layout_columns(col_widths=[3, 9]):
-            with ui.value_box(theme="primary"):
-                "Rows"
-
-                @render.text
-                def download_rows_count():
-                    """Show count of rows matching current download filters."""
-                    return f"{_download_frame().height:,}"
-
-            with ui.card():
-                ui.card_header("Export")
-
-                @render.download(
-                    filename=lambda: (
-                        "daioe_swedish_occupations_"
-                        f"{__import__('datetime').datetime.now().strftime('%Y-%m-%d')}."
-                        f"{download_extension(input.download_format())}"
-                    ),
-                    media_type=lambda: download_media_type(input.download_format()),
-                    label="Download filtered data",
+        with ui.layout_sidebar():
+            with ui.sidebar(bg="#FFFFFF", width=250, title="Filters"):
+                ui.input_select(
+                    "download_level",
+                    "SSYK level",
+                    choices={level: LEVEL_LABELS.get(level, level) for level in LEVELS},
+                    selected=DEFAULT_LEVEL,
                 )
-                def download_data():
-                    """Export filtered data in the selected format."""
-                    yield export_filtered_data(
-                        _download_frame().to_pandas(),
-                        input.download_format(),
+                ui.input_slider(
+                    "download_years",
+                    "Year range",
+                    min=YEAR_MIN,
+                    max=YEAR_MAX,
+                    value=(YEAR_MIN, YEAR_MAX),
+                    step=1,
+                    sep="",
+                )
+                ui.input_checkbox_group(
+                    "download_sex",
+                    "Sex",
+                    choices={"men": "Men", "women": "Women"},
+                    selected=SEXES,
+                    inline=True,
+                )
+                ui.input_select(
+                    "download_age",
+                    "Age group",
+                    choices={"All": "All ages"} | {a: a for a in AGES},
+                    selected="All",
+                )
+                ui.input_selectize(
+                    "download_occupation",
+                    "Occupations",
+                    choices=OCCUPATION_CHOICES[DEFAULT_LEVEL],
+                    multiple=True,
+                    options={"placeholder": "All occupations"},
+                )
+                ui.input_select(
+                    "download_format",
+                    "Format",
+                    choices={"csv": "CSV", "parquet": "Parquet", "excel": "Excel"},
+                    selected="csv",
+                )
+
+            ui.p(
+                "Export the filtered row-level dataset or inspect a compact preview before downloading.",
+                class_="text-muted mb-3",
+            )
+            with ui.layout_columns(col_widths=[3, 9]):
+                with ui.value_box(theme="primary"):
+                    "Rows"
+
+                    @render.text
+                    def download_rows_count():
+                        """Show count of rows matching current download filters."""
+                        return f"{_download_frame().height:,}"
+
+                with ui.card():
+                    ui.card_header("Export")
+
+                    @render.download(
+                        filename=lambda: (
+                            "daioe_swedish_occupations_"
+                            f"{__import__('datetime').datetime.now().strftime('%Y-%m-%d')}."
+                            f"{download_extension(input.download_format())}"
+                        ),
+                        media_type=lambda: download_media_type(input.download_format()),
+                        label="Download filtered data",
                     )
+                    def download_data():
+                        """Export filtered data in the selected format."""
+                        yield export_filtered_data(
+                            _download_frame().to_pandas(),
+                            input.download_format(),
+                        )
 
-        with ui.card(full_screen=True):
-            ui.card_header("Preview (first 50 rows)")
+            with ui.card(full_screen=True, height="500px"):
+                ui.card_header("Preview (first 50 rows)")
 
-            @render.ui
-            def download_preview():
-                """Render a preview table of the filtered download data."""
-                cols = [
-                    "level",
-                    "ssyk_code",
-                    "occupation",
-                    "year",
-                    "sex",
-                    "age_group",
-                    "count",
-                    "chg_1y",
-                    "pct_chg_1y",
-                    "chg_3y",
-                    "pct_chg_3y",
-                    "chg_5y",
-                    "pct_chg_5y",
-                    "pctl_daioe_genai_wavg",
-                    "pctl_daioe_allapps_wavg",
-                    "pctl_daioe_readcompr_wavg",
-                    "pctl_daioe_lngmod_wavg",
-                    "pctl_daioe_imggen_wavg",
-                    "pctl_daioe_imgrec_wavg",
-                    "pctl_daioe_translat_wavg",
-                    "pctl_daioe_speechrec_wavg",
-                    "pctl_daioe_stratgames_wavg",
-                    "pctl_daioe_videogames_wavg",
-                    "pctl_daioe_imgcompr_wavg",
-                ]
-                data = _download_frame().select(cols).head(50).to_pandas()
-                return as_great_table_html(data, METRICS)
+                @render.ui
+                def download_preview():
+                    """Render a preview table of the filtered download data."""
+                    cols = [
+                        "level",
+                        "ssyk_code",
+                        "occupation",
+                        "year",
+                        "sex",
+                        "age_group",
+                        "count",
+                        "chg_1y",
+                        "pct_chg_1y",
+                        "chg_3y",
+                        "pct_chg_3y",
+                        "chg_5y",
+                        "pct_chg_5y",
+                        "pctl_daioe_genai_wavg",
+                        "pctl_daioe_allapps_wavg",
+                        "pctl_daioe_readcompr_wavg",
+                        "pctl_daioe_lngmod_wavg",
+                        "pctl_daioe_imggen_wavg",
+                        "pctl_daioe_imgrec_wavg",
+                        "pctl_daioe_translat_wavg",
+                        "pctl_daioe_speechrec_wavg",
+                        "pctl_daioe_stratgames_wavg",
+                        "pctl_daioe_videogames_wavg",
+                        "pctl_daioe_imgcompr_wavg",
+                    ]
+                    data = _download_frame().select(cols).head(50).to_pandas()
+                    return as_great_table_html(data, METRICS)
 
 
 @reactive.effect
