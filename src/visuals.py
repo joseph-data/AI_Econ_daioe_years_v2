@@ -193,7 +193,7 @@ def build_comp_radar_plot(df: pd.DataFrame, metrics: dict[str, str]) -> go.Figur
 
     fig.update_layout(
         **_BASE_LAYOUT,
-        polar={"radialaxis": {"visible": True, "range": [0, 100]}},
+        polar={"bgcolor": _C_BG, "radialaxis": {"visible": True, "range": [0, 100]}},
         showlegend=True,
         legend={"orientation": "h", "yanchor": "bottom", "y": -0.25, "xanchor": "center", "x": 0.5},
     )
