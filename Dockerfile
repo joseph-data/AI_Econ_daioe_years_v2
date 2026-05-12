@@ -30,7 +30,6 @@ COPY src ./src
 COPY data ./data
 COPY logos ./logos
 COPY md_files ./md_files
-COPY www ./www
 COPY _brand.yml ./_brand.yml
 
 # Requirement for deployment at hf

@@ -1,5 +1,6 @@
 from pathlib import Path
 
+import faicons as fa
 import polars as pl
 from shiny import reactive, req
 from shiny.express import app_opts, input, render, ui
@@ -23,10 +24,7 @@ from src.setup import (
     lf,
 )
 
-app_opts(static_assets={
-    "/logos": Path(__file__).parent / "logos",
-    "/www": Path(__file__).parent / "www",
-})
+app_opts(static_assets={"/logos": Path(__file__).parent / "logos"})
 
 LEVEL_LABELS = {
     "SSYK1": "SSYK 1 - Major groups",
@@ -52,8 +50,6 @@ ui.page_opts(
     lang="en",
     full_width=True,
 )
-
-ui.tags.script(src="/www/plotly_export.js")
 
 
 @reactive.calc
@@ -150,7 +146,18 @@ with ui.navset_pill(id="tab"):
                         return visuals.build_value_boxes(summary, input.occupation())
 
                 with ui.card(full_screen=True, height="700px"):
-                    ui.card_header("AI Exposure by Sub-domain")
+                    with ui.card_header(class_="d-flex justify-content-between align-items-center"):
+                        ui.span("AI Exposure by Sub-domain")
+
+                        @render.download(
+                            label=ui.span(fa.icon_svg("download"), " PNG"),
+                            filename=lambda: f"{input.occupation().replace(' ', '_')}_ai_exposure.png",
+                            media_type="image/png",
+                        )
+                        def dl_ai_exposure_bar():
+                            df = calcs.get_occ_ai_exposure(lf, input.occupation(), int(input.occ_year()))
+                            fig = visuals.build_ai_exposure_bar(df.to_pandas(), input.occupation(), int(input.occ_year()))
+                            yield visuals.export_fig(fig, width=900, height=600)
 
                     @render_plotly
                     def ai_exposure_bar():
@@ -166,7 +173,18 @@ with ui.navset_pill(id="tab"):
                     ui.markdown(visuals.DAIOE_SOURCE_MD)
 
                 with ui.card(full_screen=True, height="700px"):
-                    ui.card_header("Employment by Age Group")
+                    with ui.card_header(class_="d-flex justify-content-between align-items-center"):
+                        ui.span("Employment by Age Group")
+
+                        @render.download(
+                            label=ui.span(fa.icon_svg("download"), " PNG"),
+                            filename=lambda: f"{input.occupation().replace(' ', '_')}_employment_by_age.png",
+                            media_type="image/png",
+                        )
+                        def dl_occ_age_chart():
+                            df = occ_employment_by_age()
+                            fig = visuals.build_age_chart(df.to_pandas(), input.occupation())
+                            yield visuals.export_fig(fig, width=1000, height=650)
                     with ui.layout_sidebar():
                         with ui.sidebar(width="220px", open="closed"):
                             ui.input_slider(
@@ -279,7 +297,17 @@ with ui.navset_pill(id="tab"):
 
             with ui.layout_columns(col_widths=[12, 12]):
                 with ui.card(full_screen=True, height="700px"):
-                    ui.card_header("Radar Comparison (AI Exposure Percentiles)")
+                    with ui.card_header(class_="d-flex justify-content-between align-items-center"):
+                        ui.span("Radar Comparison (AI Exposure Percentiles)")
+
+                        @render.download(
+                            label=ui.span(fa.icon_svg("download"), " PNG"),
+                            filename="radar_comparison.png",
+                            media_type="image/png",
+                        )
+                        def dl_comp_radar_plot():
+                            fig = visuals.build_comp_radar_plot(comp_radar_data().to_pandas(), METRICS)
+                            yield visuals.export_fig(fig, width=900, height=750)
 
                     @render_plotly
                     def comp_radar_plot():
@@ -288,7 +316,17 @@ with ui.navset_pill(id="tab"):
                         )
 
                 with ui.card(full_screen=True, height="700px"):
-                    ui.card_header("Annual Employment Change (Selected Occupations)")
+                    with ui.card_header(class_="d-flex justify-content-between align-items-center"):
+                        ui.span("Annual Employment Change (Selected Occupations)")
+
+                        @render.download(
+                            label=ui.span(fa.icon_svg("download"), " PNG"),
+                            filename="employment_comparison.png",
+                            media_type="image/png",
+                        )
+                        def dl_comparison_employment_plot():
+                            fig = visuals.build_comparison_employment_plot(comparison_data().to_pandas())
+                            yield visuals.export_fig(fig, width=1000, height=650)
 
                     @render_plotly
                     def comparison_employment_plot():

@@ -57,7 +57,6 @@ jobs:
             "_brand.yml"
             "logos/lab.svg"
             "md_files/intro.md"
-            "www/plotly_export.js"
             "data/daioe_scb_years_processed.parquet"
             "Dockerfile"
             ".dockerignore"
@@ -85,7 +84,6 @@ jobs:
             "_brand.yml"
             "logos/lab.svg"
             "md_files/intro.md"
-            "www/plotly_export.js"
             "data/daioe_scb_years_processed.parquet"
             "Dockerfile"
             ".dockerignore"
@@ -126,7 +124,6 @@ jobs:
             _brand.yml \
             logos/lab.svg \
             md_files/intro.md \
-            www/plotly_export.js \
             data/daioe_scb_years_processed.parquet \
             Dockerfile \
             .dockerignore \
