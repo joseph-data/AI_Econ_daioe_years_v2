@@ -23,7 +23,10 @@ from src.setup import (
     lf,
 )
 
-app_opts(static_assets={"/logos": Path(__file__).parent / "logos"})
+app_opts(static_assets={
+    "/logos": Path(__file__).parent / "logos",
+    "/www": Path(__file__).parent / "www",
+})
 
 LEVEL_LABELS = {
     "SSYK1": "SSYK 1 - Major groups",
@@ -49,6 +52,8 @@ ui.page_opts(
     lang="en",
     full_width=True,
 )
+
+ui.tags.script(src="/www/plotly_export.js")
 
 
 @reactive.calc
@@ -133,7 +138,7 @@ with ui.navset_pill(id="tab"):
                 )
 
             with ui.layout_columns(col_widths=[12, 12]):
-                with ui.card(full_screen=True, height="500px"):
+                with ui.card(full_screen=True, height="400px"):
 
                     @render.ui
                     def occ_value_boxes():
@@ -144,7 +149,7 @@ with ui.navset_pill(id="tab"):
                             return ui.p("No data available.")
                         return visuals.build_value_boxes(summary, input.occupation())
 
-                with ui.card(full_screen=True, height="500px"):
+                with ui.card(full_screen=True, height="700px"):
                     ui.card_header("AI Exposure by Sub-domain")
 
                     @render_plotly
@@ -160,7 +165,7 @@ with ui.navset_pill(id="tab"):
 
                     ui.markdown(visuals.DAIOE_SOURCE_MD)
 
-                with ui.card(full_screen=True, height="500px"):
+                with ui.card(full_screen=True, height="700px"):
                     ui.card_header("Employment by Age Group")
                     with ui.layout_sidebar():
                         with ui.sidebar(width="220px", open="closed"):
@@ -273,22 +278,22 @@ with ui.navset_pill(id="tab"):
                     )
 
             with ui.layout_columns(col_widths=[12, 12]):
-                with ui.card(full_screen=True, height="500px"):
-                    ui.card_header("Annual Employment Change (Selected Occupations)")
-
-                    @render_plotly
-                    def comparison_employment_plot():
-                        return visuals.build_comparison_employment_plot(
-                            comparison_data().to_pandas()
-                        )
-
-                with ui.card(full_screen=True, height="500px"):
+                with ui.card(full_screen=True, height="700px"):
                     ui.card_header("Radar Comparison (AI Exposure Percentiles)")
 
                     @render_plotly
                     def comp_radar_plot():
                         return visuals.build_comp_radar_plot(
                             comp_radar_data().to_pandas(), METRICS
+                        )
+
+                with ui.card(full_screen=True, height="700px"):
+                    ui.card_header("Annual Employment Change (Selected Occupations)")
+
+                    @render_plotly
+                    def comparison_employment_plot():
+                        return visuals.build_comparison_employment_plot(
+                            comparison_data().to_pandas()
                         )
 
     with ui.nav_panel(title="3. Download"):
@@ -368,7 +373,7 @@ with ui.navset_pill(id="tab"):
                             input.download_format(),
                         )
 
-            with ui.card(full_screen=True, height="500px"):
+            with ui.card(full_screen=True):
                 ui.card_header("Preview (first 50 rows)")
 
                 @render.ui
